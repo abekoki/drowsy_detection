@@ -5,7 +5,7 @@
 ### 1.1 アルゴリズム名
 - 連続閉眼検知アルゴリズム (Continuous Eye Closure Detection)
 - 略称: AS_drowsy_detection
-- バージョン: v1.0.0
+- バージョン: v1.0.3
 
 ### 1.2 目的・背景
 - 左右の目の開眼度 (0.0 = 完全閉眼 ~ 1.0 = 完全開眼) を入力とし、指定時間以上連続して閉眼状態が続いた場合にアラートを発報する。
@@ -54,7 +54,8 @@
 ### 2.3 パラメータ
 | パラメータ | 説明 | デフォルト値 | 下限 | 上限 |
 | --- | --- | --- | --- | --- |
-| eye_close_threshold | 開眼度がこの値以下で閉眼と判定 | **0.30** | 0.0 | 1.0 |
+| left_eye_close_threshold | 左目の開眼度がこの値以下で閉眼と判定 | **0.30** | 0.0 | 1.0 |
+| right_eye_close_threshold | 右目の開眼度がこの値以下で閉眼と判定 | **0.30** | 0.0 | 1.0 |
 | continuous_close_time | 連続閉眼とみなす時間閾値 [s] | **1.00** | 0.1 | 10.0 |
 | face_conf_threshold | 顔検出が有効とみなす信頼度 | **0.70** | 0.0 | 1.0 |
 
@@ -65,19 +66,27 @@
 ### 3.1 アルゴリズムの概要
 開眼度と顔検出信頼度を時系列で入力し、以下 3 モジュールで構成される。
 1. **前処理モジュール**: 外れ値除去・正規化を行う。
-2. **閉眼判定モジュール**: `eye_close_threshold` を用いて各フレームで閉眼フラグを生成。
-3. **連続閉眼判定モジュール**: 閉眼フラグが `continuous_close_time` 以上継続した場合に眠気フラグを立てる。
+2. **閉眼判定モジュール**: 左右それぞれの目について、`left_eye_close_threshold`、`right_eye_close_threshold` を用いて各フレームで閉眼フラグを生成。
+3. **連続閉眼判定モジュール**: 左右両方の目が閉眼状態であるフラグが `continuous_close_time` 以上継続した場合に眠気フラグを立てる。
 
 ### 3.2 処理フロー
 ```mermaid
 graph TD
     A["入力: 開眼度 & 顔信頼度"] -->|顔信頼度 ≤ face_conf_threshold| G["無効データとしてスキップ"]
-    A -->|顔信頼度 > face_conf_threshold| C{開眼度 ≤ eye_close_threshold?}
+    A -->|顔信頼度 > face_conf_threshold| B{左目開眼度 ≤ left_eye_close_threshold?}
+    B -- no --> C{右目開眼度 ≤ right_eye_close_threshold?}
     C -- no --> F["閉眼タイマー初期化"]
-    C -- yes --> D["閉眼タイマー加算"]
-    D --> E{閉眼タイマー ≥ continuous_close_time?}
-    E -- no --> F
-    E -- yes --> H["連続閉眼フラグ ON"]
+    C -- yes --> D["右目のみ閉眼"]
+    B -- yes --> E{右目開眼度 ≤ right_eye_close_threshold?}
+    E -- no --> D
+    E -- yes --> H["両目閉眼タイマー加算"]
+    H --> I{両目閉眼タイマー ≥ continuous_close_time?}
+    I -- no --> J["連続閉眼フラグ OFF"]
+    I -- yes --> K["連続閉眼フラグ ON"]
+    D --> L{両目閉眼タイマー ≥ continuous_close_time?}
+    L -- no --> M["連続閉眼フラグ OFF"]
+    L -- yes --> N["連続閉眼フラグ ON"]
+    F --> O["連続閉眼フラグ OFF"]
 ```
 
 
@@ -87,17 +96,27 @@ if face_confidence < face_conf_threshold:
     reset_timer()
     return is_drowsy=-1  # エラー
 
-if max(left_eye_open, right_eye_open) > eye_close_threshold:
-    reset_timer()
-    return is_drowsy=0   # 非連続閉眼状態
+# 左右それぞれの目の閉眼判定
+left_eye_closed = left_eye_open <= left_eye_close_threshold
+right_eye_closed = right_eye_open <= right_eye_close_threshold
 
-update_timer(dt)
-if timer >= continuous_close_time:
-    return is_drowsy=1   # 連続閉眼状態
-return is_drowsy=0       # 非連続閉眼状態
+# 両目が閉眼状態かチェック
+if left_eye_closed and right_eye_closed:
+    update_timer(dt)
+    if timer >= continuous_close_time:
+        return is_drowsy=1   # 連続閉眼状態
+    else:
+        return is_drowsy=0   # 両目閉眼中だが時間不足
+else:
+    reset_timer()
+    if timer >= continuous_close_time:
+        return is_drowsy=1   # 連続閉眼状態（タイマーが閾値を超えている間）
+    else:
+        return is_drowsy=0   # 非連続閉眼状態
 ```
 
 ### 3.3 核心アルゴリズム
+- 左右それぞれの目について独立した閉眼判定を行い、両方の目が閉眼状態である場合のみタイマーを加算する。
 - 時間積分タイマーを利用した状態遷移モデル (有限状態機械)。
 - 雑音の影響を減らすため指数移動平均 (EMA) を開眼度に適用可。
 
@@ -166,3 +185,5 @@ for frame in stream:
 | --- | --- | --- | --- |
 | 2025-08-05 | 1.0.0 | 初版作成 | GPT-Assist |
 | 2025-08-05 | 1.0.1 | 入力仕様をframe_numに変更、出力仕様をint型に統一、セクション番号修正 | GPT-Assist |
+| 2025-08-05 | 1.0.2 | 左右それぞれの目で独立した閉眼判定に変更、両目閉眼状態の継続時間で判定するロジックに修正 | GPT-Assist |
+| 2025-08-06 | 1.0.3 | 処理フロー修正：タイマーが閾値を超えている間は連続閉眼フラグをONに保持するロジックに変更 | GPT-Assist |
