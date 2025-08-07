@@ -5,7 +5,7 @@
 ### 1.1 アルゴリズム名
 - 連続閉眼検知アルゴリズム (Continuous Eye Closure Detection)
 - 略称: AS_drowsy_detection
-- バージョン: v1.0.3
+- バージョン: v1.0.4
 
 ### 1.2 目的・背景
 - 左右の目の開眼度 (0.0 = 完全閉眼 ~ 1.0 = 完全開眼) を入力とし、指定時間以上連続して閉眼状態が続いた場合にアラートを発報する。
@@ -71,22 +71,27 @@
 
 ### 3.2 処理フロー
 ```mermaid
-graph TD
-    A["入力: 開眼度 & 顔信頼度"] -->|顔信頼度 ≤ face_conf_threshold| G["無効データとしてスキップ"]
-    A -->|顔信頼度 > face_conf_threshold| B{左目開眼度 ≤ left_eye_close_threshold?}
-    B -- no --> C{右目開眼度 ≤ right_eye_close_threshold?}
-    C -- no --> F["閉眼タイマー初期化"]
-    C -- yes --> D["右目のみ閉眼"]
-    B -- yes --> E{右目開眼度 ≤ right_eye_close_threshold?}
-    E -- no --> D
-    E -- yes --> H["両目閉眼タイマー加算"]
-    H --> I{両目閉眼タイマー ≥ continuous_close_time?}
-    I -- no --> J["連続閉眼フラグ OFF"]
-    I -- yes --> K["連続閉眼フラグ ON"]
-    D --> L{両目閉眼タイマー ≥ continuous_close_time?}
-    L -- no --> M["連続閉眼フラグ OFF"]
-    L -- yes --> N["連続閉眼フラグ ON"]
-    F --> O["連続閉眼フラグ OFF"]
+flowchart TD
+    n1["入力: 開眼度 & 顔信頼度"] --> n2{"顔検出信頼度 < face_conf_threshold"}
+    n2 -- yes --> n3["信頼度低なのでスキップ"]
+    n2 -- no --> n4{"左目開眼度 < left_eye_close_threshold"}
+    n4 -- yes --> n5["左目閉眼 ← Yes"]
+    n4 -- no --> n8["左目閉眼 ← No"]
+    n5 --> n6{"右目開眼度 < right_eye_close_threshold"}
+    n6 -- yes --> n7["右目閉眼 ← Yes"]
+    n6 -- no --> n9["右目閉眼 ← No"]
+    n8 --> n6
+    n7 --> n10{"両目ともに閉眼がYes?"}
+    n9 --> n10
+    n10 -- yes --> n11["連続閉眼カウンタ加算"]
+    n10 -- no --> n12["連続閉眼カウンタクリア"]
+    n11 --> n13{"連続閉眼カウンタ > continuous_close_time"}
+    n12 --> n13
+    n13 -- yes --> n14["連続閉眼ありと判定"]
+    n13 -- no --> n15["連続閉眼なしと判定"]
+    n14 --> n16["出力:判定結果を出力"]
+    n15 --> n16
+    n3 --> n16
 ```
 
 
@@ -109,14 +114,12 @@ if left_eye_closed and right_eye_closed:
         return is_drowsy=0   # 両目閉眼中だが時間不足
 else:
     reset_timer()
-    if timer >= continuous_close_time:
-        return is_drowsy=1   # 連続閉眼状態（タイマーが閾値を超えている間）
-    else:
-        return is_drowsy=0   # 非連続閉眼状態
+    return is_drowsy=0       # 非連続閉眼状態
 ```
 
 ### 3.3 核心アルゴリズム
 - 左右それぞれの目について独立した閉眼判定を行い、両方の目が閉眼状態である場合のみタイマーを加算する。
+- 両目が閉眼状態でない場合はタイマーをリセットし、連続閉眼状態を解除する。
 - 時間積分タイマーを利用した状態遷移モデル (有限状態機械)。
 - 雑音の影響を減らすため指数移動平均 (EMA) を開眼度に適用可。
 
@@ -187,3 +190,4 @@ for frame in stream:
 | 2025-08-05 | 1.0.1 | 入力仕様をframe_numに変更、出力仕様をint型に統一、セクション番号修正 | GPT-Assist |
 | 2025-08-05 | 1.0.2 | 左右それぞれの目で独立した閉眼判定に変更、両目閉眼状態の継続時間で判定するロジックに修正 | GPT-Assist |
 | 2025-08-06 | 1.0.3 | 処理フロー修正：タイマーが閾値を超えている間は連続閉眼フラグをONに保持するロジックに変更 | GPT-Assist |
+| 2025-08-06 | 1.0.4 | 処理フロー大幅修正：フローチャートの表記修正、擬似コードとフローチャートの整合性確保 | GPT-Assist |
