@@ -34,7 +34,7 @@
 ## 詳細仕様
 
 詳細な仕様については以下をご参照ください：
-- [連続閉眼検知アルゴリズム仕様書](./algorithm_specification/AS_drowsy_detection.md)
+- [連続閉眼検知アルゴリズム仕様書](./01_algorithm_specification/AS_drowsy_detection.md)
 
 ## 開発環境
 
@@ -46,10 +46,19 @@
 
 ```
 drowsy_detection/
-├── algorithm_specification/     # アルゴリズム仕様書
-│   ├── AS_drowsy_detection.md   # 詳細仕様書
-│   └── アルゴリズム仕様書について.md
-├── source/                      # ソースコード（予定）
+├── 01_algorithm_specification/  # アルゴリズム仕様書
+│   └── AS_drowsy_detection.md   # 詳細仕様書
+├── 02_specific_design/          # 詳細設計書
+│   └── SD_drowsy_detection_python.md
+├── 03_source/                   # ソースコード
+│   ├── cli/                     # コマンドラインインターフェース
+│   ├── config/                  # 設定管理
+│   ├── core/                    # コアアルゴリズム
+│   └── utils/                   # ユーティリティ
+├── examples/                    # 使用例
+│   ├── basic_usage.py
+│   └── video_processing.py
+├── tests/                       # テストコード
 ├── README.md                    # このファイル
 ├── log.md                       # プロジェクト作業ログ
 └── pyproject.toml              # プロジェクト設定
