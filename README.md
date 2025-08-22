@@ -38,35 +38,56 @@
 
 ## 開発環境
 
-- **言語**: Python 3.11
-- **主要ライブラリ**: numpy, opencv-python, pydantic
-- **C++移植**: Eigen + OpenCV を使用予定
+- 言語: Python 3.10+
+- 主要ライブラリ: numpy, pydantic
+- パッケージ構成: src レイアウト (`src/drowsy_detection`)
+
+### インストール
+
+```bash
+# リポジトリ直からインストール（タグ例: v0.1.0）
+pip install git+https://github.com/abekoki/drowsy_detection.git@v0.1.0
+
+# 開発（ローカル）
+uv pip install -e .
+uv pip install -e .[dev]
+```
+
+### CLI
+
+```bash
+# 入力データを処理
+drowsy-detect --input path/to/data.json --output result.json
+
+# サンプル生成
+drowsy-detect --create-sample-config config.json
+drowsy-detect --create-sample-input input.json --frames 100
+```
 
 ## プロジェクト構成
 
 ```
 drowsy_detection/
-├── 01_algorithm_specification/  # アルゴリズム仕様書
-│   └── AS_drowsy_detection.md   # 詳細仕様書
-├── 02_specific_design/          # 詳細設計書
-│   └── SD_drowsy_detection_python.md
-├── 03_source/                   # ソースコード
-│   ├── cli/                     # コマンドラインインターフェース
-│   ├── config/                  # 設定管理
-│   ├── core/                    # コアアルゴリズム
-│   └── utils/                   # ユーティリティ
-├── examples/                    # 使用例
-│   ├── basic_usage.py
-│   └── video_processing.py
-├── tests/                       # テストコード
-├── README.md                    # このファイル
-├── log.md                       # プロジェクト作業ログ
-└── pyproject.toml              # プロジェクト設定
+├── 00_requirements/
+├── 01_algorithm_specification/
+├── 02_specific_design/
+├── 03_source/                   # 旧構成（残置）
+├── src/
+│   └── drowsy_detection/
+│       ├── cli/
+│       ├── config/
+│       ├── core/
+│       └── utils/
+├── examples/
+├── tests/
+├── README.md
+├── pyproject.toml
+└── log.md
 ```
 
 ## ライセンス
 
-[ライセンス情報を記載予定]
+MIT License（`LICENSE`を参照）
 
 ## 貢献
 

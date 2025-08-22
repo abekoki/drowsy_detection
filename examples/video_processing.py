@@ -4,17 +4,9 @@
 実際の動画ストリームを想定した連続閉眼検知の使用例を示します。
 """
 
-import sys
-import time
-import random
-from pathlib import Path
-
-# パッケージのルートを追加
-sys.path.append(str(Path(__file__).parent.parent))
-
-from source.config.config import Config
-from source.config.validators import InputData
-from source.core.drowsy_detector import DrowsyDetector
+from drowsy_detection.config.config import Config
+from drowsy_detection.config.validators import InputData
+from drowsy_detection.core.drowsy_detector import DrowsyDetector
 
 
 def simulate_video_stream(duration_seconds: int = 30, fps: int = 30):

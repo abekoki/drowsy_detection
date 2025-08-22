@@ -159,3 +159,14 @@
   └── その他設定ファイル
   ```
 - **効果**: フォルダ構造の論理的な整理、ドキュメント配置の最適化、開発者向けとユーザー向けドキュメントの明確な分離 
+
+## ===2025-08-22===
+
+### パッケージング・レイアウト移行（src化）とメタ更新
+- 変更: `src/drowsy_detection/` を新設し、`config/`, `core/`, `utils/`, `cli/` を整備
+- 依存: `numpy`, `pydantic` のみに整理（opencv除外）
+- ビルド: `pyproject.toml` を setuptools 構成に変更、`drowsy-detect` エントリ追加
+- 付帯: `MANIFEST.in` 追加、`.gitignore` 拡充、`LICENSE`(MIT), `CHANGELOG.md` 追加
+- CI: Windows + py3.10/3.11 で `uv` + `pytest --cov` のworkflow追加
+- README: インストール/CLI/構成図を現実装に更新
+- テスト: env再作成後、段階実行（config→core→detector）で全テスト成功

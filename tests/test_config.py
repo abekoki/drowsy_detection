@@ -3,14 +3,8 @@
 """
 
 import pytest
-import sys
-from pathlib import Path
-
-# パッケージのルートを追加
-sys.path.append(str(Path(__file__).parent.parent))
-
-from source.config.config import Config, ConfigValidator
-from source.config.validators import InputData, OutputData
+from drowsy_detection.config.config import Config, ConfigValidator
+from drowsy_detection.config.validators import InputData, OutputData
 
 
 class TestConfig:

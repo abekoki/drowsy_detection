@@ -4,15 +4,9 @@
 連続閉眼検知アルゴリズムの基本的な使用方法を示します。
 """
 
-import sys
-from pathlib import Path
-
-# パッケージのルートを追加
-sys.path.append(str(Path(__file__).parent.parent))
-
-from source.config.config import Config
-from source.config.validators import InputData
-from source.core.drowsy_detector import DrowsyDetector
+from drowsy_detection.config.config import Config
+from drowsy_detection.config.validators import InputData
+from drowsy_detection.core.drowsy_detector import DrowsyDetector
 
 
 def basic_example():

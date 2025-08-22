@@ -3,14 +3,8 @@
 """
 
 import pytest
-import sys
-from pathlib import Path
-
-# パッケージのルートを追加
-sys.path.append(str(Path(__file__).parent.parent))
-
-from source.core.timer import ContinuousTimer, TimerState
-from source.core.eye_state import EyeStateManager, EyeState
+from drowsy_detection.core.timer import ContinuousTimer, TimerState
+from drowsy_detection.core.eye_state import EyeStateManager, EyeState
 
 
 class TestContinuousTimer:
