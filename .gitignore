@@ -26,3 +26,4 @@ htmlcov/
 Thumbs.db
 .coverage.*
 drowsy_detection_debug.log
+.pytest_cache/
