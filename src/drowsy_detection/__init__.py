@@ -12,7 +12,7 @@
 - cli: コマンドラインインターフェース
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "drowsy_detection contributors"
 
 from drowsy_detection.config.config import Config
