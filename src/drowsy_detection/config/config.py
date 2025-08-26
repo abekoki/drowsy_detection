@@ -14,13 +14,13 @@ class Config(BaseModel):
     
     # 閾値パラメータ
     left_eye_close_threshold: float = Field(
-        default=0.30,
+        default=0.10,
         ge=0.0,
         le=1.0,
         description="左目の開眼度がこの値以下で閉眼と判定"
     )
     right_eye_close_threshold: float = Field(
-        default=0.30,
+        default=0.10,
         ge=0.0,
         le=1.0,
         description="右目の開眼度がこの値以下で閉眼と判定"
@@ -32,7 +32,7 @@ class Config(BaseModel):
         description="連続閉眼とみなす時間閾値 [s]"
     )
     face_conf_threshold: float = Field(
-        default=0.70,
+        default=0.75,
         ge=0.0,
         le=1.0,
         description="顔検出が有効とみなす信頼度"

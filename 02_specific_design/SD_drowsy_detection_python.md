@@ -5,7 +5,7 @@
 ### 1.1 設計書名
 - 連続閉眼検知アルゴリズム Python実装詳細設計書
 - 略称: SD_drowsy_detection_python
-- バージョン: v1.0.0
+- バージョン: v1.0.1
 - 作成日: 2025-08-07
 
 ### 1.2 目的・背景
@@ -87,13 +87,13 @@ class Config(BaseModel):
     
     # 閾値パラメータ
     left_eye_close_threshold: float = Field(
-        default=0.30,
+        default=0.10,
         ge=0.0,
         le=1.0,
         description="左目の開眼度がこの値以下で閉眼と判定"
     )
     right_eye_close_threshold: float = Field(
-        default=0.30,
+        default=0.10,
         ge=0.0,
         le=1.0,
         description="右目の開眼度がこの値以下で閉眼と判定"
@@ -105,7 +105,7 @@ class Config(BaseModel):
         description="連続閉眼とみなす時間閾値 [s]"
     )
     face_conf_threshold: float = Field(
-        default=0.70,
+        default=0.75,
         ge=0.0,
         le=1.0,
         description="顔検出が有効とみなす信頼度"
@@ -694,10 +694,10 @@ class TestDrowsyDetector:
     def config(self):
         """テスト用設定"""
         return Config(
-            left_eye_close_threshold=0.30,
-            right_eye_close_threshold=0.30,
+            left_eye_close_threshold=0.10,
+            right_eye_close_threshold=0.10,
             continuous_close_time=1.0,
-            face_conf_threshold=0.70
+            face_conf_threshold=0.75
         )
     
     @pytest.fixture
@@ -884,12 +884,12 @@ from core.drowsy_detector import DrowsyDetector
 
 def main():
     # 設定
-    config = Config(
-        left_eye_close_threshold=0.30,
-        right_eye_close_threshold=0.30,
-        continuous_close_time=1.0,
-        face_conf_threshold=0.70
-    )
+            config = Config(
+            left_eye_close_threshold=0.10,
+            right_eye_close_threshold=0.10,
+            continuous_close_time=1.0,
+            face_conf_threshold=0.75
+        )
     
     # 検出器初期化
     detector = DrowsyDetector(config)
@@ -970,6 +970,7 @@ if __name__ == "__main__":
 | 日付 | バージョン | 変更箇所 | 変更者 |
 | --- | --- | --- | --- |
 | 2025-08-07 | 1.0.0 | 初版作成 | GPT-Assist |
+| 2025-08-26 | 1.0.1 | 検知感度パラメータ調整：左右目閉眼閾値を0.30→0.10、顔検出閾値を0.70→0.75に変更 | GPT-Assist |
 
 ---
 
