@@ -132,6 +132,44 @@ e3803bb .gitignoreにpytestのキャッシュディレクトリを追加...
 ==========================================
 ```
 
+## 🚨 緊急対応: PowerShell実行ポリシーエラー
+
+### 問題
+```
+Error: File ... cannot be loaded because running scripts is disabled on this system
+```
+
+### 即座の解決方法
+
+#### 1. システム管理者による緊急修正（最優先）
+
+**管理者権限でPowerShellを開いて実行**:
+```powershell
+# 現在の実行ポリシーを確認
+Get-ExecutionPolicy -List
+
+# システム全体の実行ポリシーを変更（緊急対応）
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope LocalMachine -Force
+
+# ユーザーレベルでも変更
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force
+
+# 変更確認
+Get-ExecutionPolicy -List
+```
+
+#### 2. ワークフローの変更（PowerShell回避）
+
+現在のワークフローは`shell: cmd`を使用してPowerShellを完全に回避しています。
+
+#### 3. セルフホストランナー環境の確認
+
+```powershell
+# ランナーが正常に動作するか確認
+cd C:\actions-runner
+.\run.cmd --check
+```
+
 ## トラブルシューティング
 
 ### よくある問題
