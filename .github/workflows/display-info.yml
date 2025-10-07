@@ -27,96 +27,31 @@ jobs:
       id: commit-info
       shell: cmd
       run: |
-        REM 直近のコミットハッシュを取得
-        for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
-        for /f %%i in ('git rev-parse --short HEAD') do set COMMIT_SHORT=%%i
-        
-        REM コミットメッセージを取得（Base64エンコードで安全に）
-        git log -1 --pretty=format:"%%s" > commit_message.txt
-        python -c "import base64; print(base64.b64encode(open('commit_message.txt', 'rb').read()).decode('ascii'))" > commit_message_b64.txt
-        set /p COMMIT_MESSAGE_B64=<commit_message_b64.txt
-        
-        REM コミット日時を取得
-        git log -1 --pretty=format:"%%ci" > commit_date.txt
-        set /p COMMIT_DATE=<commit_date.txt
-        
-        REM ブランチ名を取得
-        for /f %%i in ('git rev-parse --abbrev-ref HEAD') do set BRANCH_NAME=%%i
-        
-        REM バージョン情報を取得（pyproject.tomlから）
-        for /f %%i in ('python -c "import tomllib; print(tomllib.load(open(\"pyproject.toml\", \"rb\"))[\"project\"][\"version\"])"') do set VERSION=%%i
-        
-        REM 変更ログを生成（直近5コミット）
-        git log --oneline -5 > changelog_temp.txt
-        
-        REM GitHub Actionsの出力に設定（Base64エンコードで安全に）
-        echo commit_hash=%COMMIT_HASH% >> %GITHUB_OUTPUT%
-        echo commit_short=%COMMIT_SHORT% >> %GITHUB_OUTPUT%
-        echo commit_message_b64=%COMMIT_MESSAGE_B64% >> %GITHUB_OUTPUT%
-        echo commit_date=%COMMIT_DATE% >> %GITHUB_OUTPUT%
-        echo branch_name=%BRANCH_NAME% >> %GITHUB_OUTPUT%
-        echo version=%VERSION% >> %GITHUB_OUTPUT%
-        echo changelog= >> %GITHUB_OUTPUT%
-        type changelog_temp.txt >> %GITHUB_OUTPUT%
+        python scripts/get_commit_info.py
     
     - name: Display information
       shell: cmd
       run: |
-        REM Base64デコードされたコミットメッセージを取得
-        python -c "import base64; print(base64.b64decode('${{ steps.commit-info.outputs.commit_message_b64 }}').decode('utf-8'))" > decoded_message.txt
-        set /p DECODED_MESSAGE=<decoded_message.txt
-        
-        echo ==========================================
-        echo 📋 プロジェクト情報
-        echo ==========================================
-        echo 🏷️  バージョン: ${{ steps.commit-info.outputs.version }}
-        echo 🌿 ブランチ: ${{ steps.commit-info.outputs.branch_name }}
-        echo 📅 実行日時: %date% %time%
-        echo.
-        echo ==========================================
-        echo 🔗 コミット情報
-        echo ==========================================
-        echo 📝 コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }}
-        echo 🔖 短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }}
-        echo 💬 コミットメッセージ: %DECODED_MESSAGE%
-        echo ⏰ コミット日時: ${{ steps.commit-info.outputs.commit_date }}
-        echo.
-        echo ==========================================
-        echo 📜 変更ログ（直近5コミット）
-        echo ==========================================
-        echo ${{ steps.commit-info.outputs.changelog }}
-        echo.
-        echo ==========================================
-        echo ✅ 情報表示完了
-        echo ==========================================
+        set COMMIT_HASH=${{ steps.commit-info.outputs.commit_hash }}
+        set COMMIT_SHORT=${{ steps.commit-info.outputs.commit_short }}
+        set COMMIT_MESSAGE_B64=${{ steps.commit-info.outputs.commit_message_b64 }}
+        set COMMIT_DATE=${{ steps.commit-info.outputs.commit_date }}
+        set BRANCH_NAME=${{ steps.commit-info.outputs.branch_name }}
+        set VERSION=${{ steps.commit-info.outputs.version }}
+        set CHANGELOG=${{ steps.commit-info.outputs.changelog }}
+        python scripts/display_info.py
     
     - name: Save information to file
       shell: cmd
       run: |
-        REM Base64デコードされたコミットメッセージを取得
-        python -c "import base64; print(base64.b64decode('${{ steps.commit-info.outputs.commit_message_b64 }}').decode('utf-8'))" > decoded_message.txt
-        set /p DECODED_MESSAGE=<decoded_message.txt
-        
-        REM 情報をファイルに保存
-        echo プロジェクト情報 > commit_info.txt
-        echo ================ >> commit_info.txt
-        echo バージョン: ${{ steps.commit-info.outputs.version }} >> commit_info.txt
-        echo ブランチ: ${{ steps.commit-info.outputs.branch_name }} >> commit_info.txt
-        echo 実行日時: %date% %time% >> commit_info.txt
-        echo. >> commit_info.txt
-        echo コミット情報 >> commit_info.txt
-        echo ============ >> commit_info.txt
-        echo コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }} >> commit_info.txt
-        echo 短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }} >> commit_info.txt
-        echo コミットメッセージ: %DECODED_MESSAGE% >> commit_info.txt
-        echo コミット日時: ${{ steps.commit-info.outputs.commit_date }} >> commit_info.txt
-        echo. >> commit_info.txt
-        echo 変更ログ（直近5コミット） >> commit_info.txt
-        echo ======================== >> commit_info.txt
-        echo ${{ steps.commit-info.outputs.changelog }} >> commit_info.txt
-        
-        echo 📄 情報を commit_info.txt に保存しました
-        type commit_info.txt
+        set COMMIT_HASH=${{ steps.commit-info.outputs.commit_hash }}
+        set COMMIT_SHORT=${{ steps.commit-info.outputs.commit_short }}
+        set COMMIT_MESSAGE_B64=${{ steps.commit-info.outputs.commit_message_b64 }}
+        set COMMIT_DATE=${{ steps.commit-info.outputs.commit_date }}
+        set BRANCH_NAME=${{ steps.commit-info.outputs.branch_name }}
+        set VERSION=${{ steps.commit-info.outputs.version }}
+        set CHANGELOG=${{ steps.commit-info.outputs.changelog }}
+        python scripts/display_info.py save
     
     - name: Upload commit info as artifact
       uses: actions/upload-artifact@v4
