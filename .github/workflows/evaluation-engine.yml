@@ -26,10 +26,12 @@ jobs:
       shell: cmd
       run: |
         echo uvの確認中...
-        uv --version >nul 2>&1 || (
+        where uv >nul 2>&1 || (
           echo uvをインストール中...
           pip install uv
         )
+        echo uvのパス確認:
+        where uv
         echo ✅ uv準備完了
     
     - name: Clone evaluation_engine repository
@@ -51,16 +53,36 @@ jobs:
         echo evaluation_engineの環境セットアップ中...
         
         REM 仮想環境の作成
+        echo 仮想環境作成中...
         uv venv
-        echo 仮想環境作成完了
+        if errorlevel 1 (
+          echo ❌ 仮想環境作成に失敗しました
+          exit /b 1
+        )
+        echo ✅ 仮想環境作成完了
         
-        REM 仮想環境をアクティベートして依存関係をインストール
-        call .venv\Scripts\activate.bat && uv sync
-        echo 依存関係インストール完了
+        REM 依存関係のインストール
+        echo 依存関係インストール中...
+        call .venv\Scripts\activate.bat
+        if errorlevel 1 (
+          echo ❌ 仮想環境のアクティベートに失敗しました
+          exit /b 1
+        )
+        uv sync
+        if errorlevel 1 (
+          echo ❌ 依存関係のインストールに失敗しました
+          exit /b 1
+        )
+        echo ✅ 依存関係インストール完了
         
-        REM drowsy_detectionアルゴリズムのインストール（現在のリポジトリから）
-        call .venv\Scripts\activate.bat && uv pip install -e ../
-        echo drowsy_detectionインストール完了
+        REM drowsy_detectionアルゴリズムのインストール
+        echo drowsy_detectionインストール中...
+        uv pip install -e ../
+        if errorlevel 1 (
+          echo ❌ drowsy_detectionのインストールに失敗しました
+          exit /b 1
+        )
+        echo ✅ drowsy_detectionインストール完了
         
         echo ✅ evaluation_engine環境セットアップ完了
     
@@ -69,7 +91,16 @@ jobs:
       run: |
         cd evaluation_engine
         echo evaluation_engineのmain.pyを実行中...
-        call .venv\Scripts\activate.bat && python main.py
+        call .venv\Scripts\activate.bat
+        if errorlevel 1 (
+          echo ❌ 仮想環境のアクティベートに失敗しました
+          exit /b 1
+        )
+        python main.py
+        if errorlevel 1 (
+          echo ❌ main.pyの実行に失敗しました
+          exit /b 1
+        )
         echo ✅ evaluation_engine実行完了
     
     - name: Upload evaluation results as artifact
