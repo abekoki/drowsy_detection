@@ -2,11 +2,23 @@
 """
 GitHub Actions用情報表示スクリプト
 コミット情報を整形して表示・ファイル保存
+Windows CMD環境でのUnicode対応
 """
 
 import base64
 import os
+import sys
 from datetime import datetime
+
+
+def safe_print(text: str):
+    """安全な文字列出力（Unicode対応）"""
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # Unicodeエラーの場合はASCII文字に置換
+        safe_text = text.encode('ascii', 'replace').decode('ascii')
+        print(safe_text)
 
 
 def decode_commit_message(encoded_message: str) -> str:
@@ -43,29 +55,29 @@ def display_info():
     # 現在時刻を取得
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S JST')
     
-    print("==========================================")
-    print("📋 プロジェクト情報")
-    print("==========================================")
-    print(f"🏷️  バージョン: {version}")
-    print(f"🌿 ブランチ: {branch_name}")
-    print(f"📅 実行日時: {current_time}")
-    print()
-    print("==========================================")
-    print("🔗 コミット情報")
-    print("==========================================")
-    print(f"📝 コミットハッシュ: {commit_hash}")
-    print(f"🔖 短縮ハッシュ: {commit_short}")
-    print(f"💬 コミットメッセージ: {commit_message}")
-    print(f"⏰ コミット日時: {commit_date}")
-    print()
-    print("==========================================")
-    print("📜 変更ログ（直近5コミット）")
-    print("==========================================")
-    print(changelog)
-    print()
-    print("==========================================")
-    print("✅ 情報表示完了")
-    print("==========================================")
+    safe_print("==========================================")
+    safe_print("[INFO] プロジェクト情報")
+    safe_print("==========================================")
+    safe_print(f"[VER] バージョン: {version}")
+    safe_print(f"[BR] ブランチ: {branch_name}")
+    safe_print(f"[TIME] 実行日時: {current_time}")
+    safe_print("")
+    safe_print("==========================================")
+    safe_print("[COMMIT] コミット情報")
+    safe_print("==========================================")
+    safe_print(f"[HASH] コミットハッシュ: {commit_hash}")
+    safe_print(f"[SHORT] 短縮ハッシュ: {commit_short}")
+    safe_print(f"[MSG] コミットメッセージ: {commit_message}")
+    safe_print(f"[DATE] コミット日時: {commit_date}")
+    safe_print("")
+    safe_print("==========================================")
+    safe_print("[CHANGELOG] 変更ログ（直近5コミット）")
+    safe_print("==========================================")
+    safe_print(changelog)
+    safe_print("")
+    safe_print("==========================================")
+    safe_print("[OK] 情報表示完了")
+    safe_print("==========================================")
 
 
 def save_to_file():
@@ -86,30 +98,35 @@ def save_to_file():
     # 現在時刻を取得
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S JST')
     
-    # ファイルに保存
-    with open('commit_info.txt', 'w', encoding='utf-8') as f:
-        f.write("プロジェクト情報\n")
-        f.write("================\n")
-        f.write(f"バージョン: {version}\n")
-        f.write(f"ブランチ: {branch_name}\n")
-        f.write(f"実行日時: {current_time}\n")
-        f.write("\n")
-        f.write("コミット情報\n")
-        f.write("============\n")
-        f.write(f"コミットハッシュ: {commit_hash}\n")
-        f.write(f"短縮ハッシュ: {commit_short}\n")
-        f.write(f"コミットメッセージ: {commit_message}\n")
-        f.write(f"コミット日時: {commit_date}\n")
-        f.write("\n")
-        f.write("変更ログ（直近5コミット）\n")
-        f.write("========================\n")
-        f.write(f"{changelog}\n")
-    
-    print("📄 情報を commit_info.txt に保存しました")
-    
-    # ファイル内容を表示
-    with open('commit_info.txt', 'r', encoding='utf-8') as f:
-        print(f.read())
+    # ファイルに保存（UTF-8エンコーディング）
+    try:
+        with open('commit_info.txt', 'w', encoding='utf-8') as f:
+            f.write("プロジェクト情報\n")
+            f.write("================\n")
+            f.write(f"バージョン: {version}\n")
+            f.write(f"ブランチ: {branch_name}\n")
+            f.write(f"実行日時: {current_time}\n")
+            f.write("\n")
+            f.write("コミット情報\n")
+            f.write("============\n")
+            f.write(f"コミットハッシュ: {commit_hash}\n")
+            f.write(f"短縮ハッシュ: {commit_short}\n")
+            f.write(f"コミットメッセージ: {commit_message}\n")
+            f.write(f"コミット日時: {commit_date}\n")
+            f.write("\n")
+            f.write("変更ログ（直近5コミット）\n")
+            f.write("========================\n")
+            f.write(f"{changelog}\n")
+        
+        safe_print("[SAVE] 情報を commit_info.txt に保存しました")
+        
+        # ファイル内容を表示
+        with open('commit_info.txt', 'r', encoding='utf-8') as f:
+            content = f.read()
+            safe_print(content)
+            
+    except Exception as e:
+        safe_print(f"[ERROR] ファイル保存エラー: {e}")
 
 
 def main():
