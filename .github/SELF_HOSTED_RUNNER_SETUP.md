@@ -98,14 +98,31 @@ e3803bb .gitignoreにpytestのキャッシュディレクトリを追加...
 
 ### よくある問題
 
-1. **ランナーが認識されない**
+1. **PowerShell実行ポリシーエラー**
+   ```
+   Error: ./setup.ps1 : File ... cannot be loaded because running scripts is disabled on this system
+   ```
+   
+   **解決方法**:
+   ```powershell
+   # 現在の実行ポリシーを確認
+   Get-ExecutionPolicy
+   
+   # 実行ポリシーを変更（管理者権限が必要）
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+   
+   # または、より安全な設定
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+2. **ランナーが認識されない**
    - GitHubリポジトリのSettingsでランナーが登録されているか確認
    - ランナーが起動しているか確認
 
-2. **Pythonバージョンエラー**
+3. **Pythonバージョンエラー**
    - セルフホストランナー環境にPython 3.10以上がインストールされているか確認
 
-3. **権限エラー**
+4. **権限エラー**
    - ランナーがリポジトリにアクセス権限を持っているか確認
 
 ### ログ確認

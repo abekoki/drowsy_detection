@@ -14,10 +14,18 @@ jobs:
       with:
         fetch-depth: 0  # 全履歴を取得
     
-    - name: Set up Python
+    - name: Verify Python installation
+      run: |
+        python --version
+        python -c "import sys; print(f'Python {sys.version}')"
+    
+    - name: Set up Python (fallback)
+      if: failure()
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
+        check-latest: false
+        update-environment: false
     
     - name: Get commit information
       id: commit-info
