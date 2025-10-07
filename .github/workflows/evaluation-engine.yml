@@ -26,7 +26,7 @@ jobs:
       shell: cmd
       run: |
         echo uvの確認中...
-        uv --version || (
+        uv --version >nul 2>&1 || (
           echo uvをインストール中...
           pip install uv
         )
@@ -50,13 +50,17 @@ jobs:
         cd evaluation_engine
         echo evaluation_engineの環境セットアップ中...
         
-        # 仮想環境の作成と依存関係のインストール
+        REM 仮想環境の作成
         uv venv
-        call .venv\Scripts\activate.bat
-        uv sync
+        echo 仮想環境作成完了
         
-        # drowsy_detectionアルゴリズムのインストール（現在のリポジトリから）
-        uv pip install -e ../
+        REM 仮想環境をアクティベートして依存関係をインストール
+        call .venv\Scripts\activate.bat && uv sync
+        echo 依存関係インストール完了
+        
+        REM drowsy_detectionアルゴリズムのインストール（現在のリポジトリから）
+        call .venv\Scripts\activate.bat && uv pip install -e ../
+        echo drowsy_detectionインストール完了
         
         echo ✅ evaluation_engine環境セットアップ完了
     
@@ -64,11 +68,8 @@ jobs:
       shell: cmd
       run: |
         cd evaluation_engine
-        call .venv\Scripts\activate.bat
-        
         echo evaluation_engineのmain.pyを実行中...
-        python main.py
-        
+        call .venv\Scripts\activate.bat && python main.py
         echo ✅ evaluation_engine実行完了
     
     - name: Upload evaluation results as artifact
