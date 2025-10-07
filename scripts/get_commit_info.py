@@ -59,6 +59,7 @@ def get_commit_info():
     # 変更ログ（直近5コミット）
     changelog = run_git_command('git log --oneline -5')
     info['changelog'] = changelog
+    info['changelog_b64'] = base64.b64encode(changelog.encode('utf-8')).decode('ascii')
     
     return info
 
@@ -70,8 +71,14 @@ def write_github_output(info: dict):
     if github_output_path:
         try:
             with open(github_output_path, 'a', encoding='utf-8') as f:
-                for key, value in info.items():
-                    f.write(f"{key}={value}\n")
+                # 安全な出力のみ（Base64エンコードされたもの）
+                safe_outputs = [
+                    'commit_hash', 'commit_short', 'commit_message_b64', 
+                    'commit_date', 'branch_name', 'version', 'changelog_b64'
+                ]
+                for key in safe_outputs:
+                    if key in info:
+                        f.write(f"{key}={info[key]}\n")
         except Exception as e:
             print(f"GitHub出力ファイル書き込みエラー: {e}", file=sys.stderr)
     else:

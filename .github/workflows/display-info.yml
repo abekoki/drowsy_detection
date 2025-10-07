@@ -38,7 +38,7 @@ jobs:
         set COMMIT_DATE=${{ steps.commit-info.outputs.commit_date }}
         set BRANCH_NAME=${{ steps.commit-info.outputs.branch_name }}
         set VERSION=${{ steps.commit-info.outputs.version }}
-        set CHANGELOG=${{ steps.commit-info.outputs.changelog }}
+        set CHANGELOG_B64=${{ steps.commit-info.outputs.changelog_b64 }}
         python scripts/display_info.py
     
     - name: Save information to file
@@ -50,7 +50,7 @@ jobs:
         set COMMIT_DATE=${{ steps.commit-info.outputs.commit_date }}
         set BRANCH_NAME=${{ steps.commit-info.outputs.branch_name }}
         set VERSION=${{ steps.commit-info.outputs.version }}
-        set CHANGELOG=${{ steps.commit-info.outputs.changelog }}
+        set CHANGELOG_B64=${{ steps.commit-info.outputs.changelog_b64 }}
         python scripts/display_info.py save
     
     - name: Upload commit info as artifact

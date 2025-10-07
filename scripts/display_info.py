@@ -17,6 +17,14 @@ def decode_commit_message(encoded_message: str) -> str:
         return encoded_message  # デコードに失敗した場合は元の文字列を返す
 
 
+def decode_changelog(encoded_changelog: str) -> str:
+    """Base64エンコードされたchangelogをデコード"""
+    try:
+        return base64.b64decode(encoded_changelog).decode('utf-8')
+    except Exception:
+        return encoded_changelog  # デコードに失敗した場合は元の文字列を返す
+
+
 def display_info():
     """情報を表示"""
     # GitHub Actionsの出力から情報を取得
@@ -26,10 +34,11 @@ def display_info():
     commit_date = os.environ.get('COMMIT_DATE', 'unknown')
     branch_name = os.environ.get('BRANCH_NAME', 'unknown')
     version = os.environ.get('VERSION', 'unknown')
-    changelog = os.environ.get('CHANGELOG', '')
+    changelog_b64 = os.environ.get('CHANGELOG_B64', '')
     
-    # コミットメッセージをデコード
+    # コミットメッセージとchangelogをデコード
     commit_message = decode_commit_message(commit_message_b64)
+    changelog = decode_changelog(changelog_b64)
     
     # 現在時刻を取得
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S JST')
@@ -68,10 +77,11 @@ def save_to_file():
     commit_date = os.environ.get('COMMIT_DATE', 'unknown')
     branch_name = os.environ.get('BRANCH_NAME', 'unknown')
     version = os.environ.get('VERSION', 'unknown')
-    changelog = os.environ.get('CHANGELOG', '')
+    changelog_b64 = os.environ.get('CHANGELOG_B64', '')
     
-    # コミットメッセージをデコード
+    # コミットメッセージとchangelogをデコード
     commit_message = decode_commit_message(commit_message_b64)
+    changelog = decode_changelog(changelog_b64)
     
     # 現在時刻を取得
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S JST')
