@@ -51,8 +51,21 @@ jobs:
         echo uvのパス確認:
         where uv 2>nul || echo uvがパスに見つかりません
         echo python -m uvの確認:
-        python -c "import uv; print('uvモジュール利用可能:', uv.__version__)" 2>nul || echo uvモジュールが利用できません
+        python -c "import uv; print('uvモジュール利用可能:', uv.__version__)" 2>nul || (
+          echo uvモジュールのインポートに失敗しました - これは正常な場合があります
+          echo 代替方法でuvの確認:
+          python -c "import subprocess; result = subprocess.run(['python', '-m', 'uv', '--version'], capture_output=True, text=True); print('python -m uv version:', result.stdout.strip() if result.returncode == 0 else 'Failed')" 2>nul || echo python -m uvの実行に失敗
+        )
         echo ✅ uv準備完了
+        
+        REM uvの実際の動作確認
+        echo ========================================
+        echo uvの実際の動作確認
+        echo ========================================
+        echo python -m uv --versionの実行:
+        python -m uv --version 2>nul || echo python -m uv --versionに失敗
+        echo python -m uv venv --helpの実行:
+        python -m uv venv --help 2>nul | findstr "Create a virtual environment" || echo python -m uv venv --helpに失敗
     
     - name: Clone evaluation_engine repository
       shell: cmd
