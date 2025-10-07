@@ -122,24 +122,7 @@ jobs:
         ) else (
           echo ✅ uv sync完了
         )
-        
-        REM drowsy_detectionアルゴリズムのインストール
-        echo ========================================
-        echo drowsy_detectionアルゴリズムのインストール
-        echo ========================================
-        echo drowsy_detectionインストール中...
-        echo 親ディレクトリの内容:
-        dir ..
-        echo uv pip installでdrowsy_detectionをインストール中...
-        uv pip install -e ../
-        if errorlevel 1 (
-          echo ❌ drowsy_detectionのインストールに失敗しました
-          exit /b 1
-        )
-        echo ✅ drowsy_detectionインストール完了
-        echo インストール後のパッケージ一覧:
-        python -m pip list | findstr drowsy
-        
+
         echo ✅ evaluation_engine環境セットアップ完了
     
     - name: Run evaluation_engine main.py
