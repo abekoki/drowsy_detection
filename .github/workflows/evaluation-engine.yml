@@ -109,13 +109,7 @@ jobs:
         echo 仮想環境の作成
         echo ========================================
         echo 仮想環境作成中...
-        where uv >nul 2>&1 && (
-          echo uvコマンドを使用して仮想環境作成
-          uv venv
-        ) || (
-          echo python -m uvを使用して仮想環境作成
-          python -m uv venv
-        )
+        uv venv
         if errorlevel 1 (
           echo ❌ 仮想環境作成に失敗しました
           exit /b 1
@@ -136,13 +130,8 @@ jobs:
         )
         echo 仮想環境アクティベート後のPythonパス:
         python -c "import sys; print(sys.executable)"
-        where uv >nul 2>&1 && (
-          echo uvコマンドを使用して依存関係インストール
-          uv sync
-        ) || (
-          echo python -m uvを使用して依存関係インストール
-          python -m uv sync
-        )
+        echo uv syncで依存関係を解決中...
+        uv sync
         if errorlevel 1 (
           echo ❌ 依存関係のインストールに失敗しました
           exit /b 1
@@ -156,13 +145,8 @@ jobs:
         echo drowsy_detectionインストール中...
         echo 親ディレクトリの内容:
         dir ..
-        where uv >nul 2>&1 && (
-          echo uvコマンドを使用してdrowsy_detectionインストール
-          uv pip install -e ../
-        ) || (
-          echo python -m uvを使用してdrowsy_detectionインストール
-          python -m uv pip install -e ../
-        )
+        echo uv pip installでdrowsy_detectionをインストール中...
+        uv pip install -e ../
         if errorlevel 1 (
           echo ❌ drowsy_detectionのインストールに失敗しました
           exit /b 1
@@ -189,13 +173,8 @@ jobs:
         dir main.py
         echo 仮想環境の確認:
         dir .venv
-        where uv >nul 2>&1 && (
-          echo uv run main.pyを実行
-          uv run main.py
-        ) || (
-          echo python -m uv run main.pyを実行
-          python -m uv run main.py
-        )
+        echo uv run main.pyを実行中...
+        uv run main.py
         if errorlevel 1 (
           echo ❌ main.pyの実行に失敗しました
           echo エラー詳細を確認:
