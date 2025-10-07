@@ -98,45 +98,23 @@ jobs:
         echo evaluation_engine環境セットアップ
         echo ========================================
         cd evaluation_engine
-        echo evaluation_engineの環境セットアップ中...
+        echo evaluation_engineディレクトリに移動完了
         echo 現在のディレクトリ:
         cd
         echo evaluation_engineディレクトリ内容:
         dir
         
-        REM 仮想環境の作成
+        REM uv syncで依存関係を解決
         echo ========================================
-        echo 仮想環境の作成
+        echo uv syncで依存関係を解決
         echo ========================================
-        echo 仮想環境作成中...
-        uv venv
-        if errorlevel 1 (
-          echo ❌ 仮想環境作成に失敗しました
-          exit /b 1
-        )
-        echo ✅ 仮想環境作成完了
-        echo .venvディレクトリ内容:
-        dir .venv
-        
-        REM 依存関係のインストール
-        echo ========================================
-        echo 依存関係のインストール
-        echo ========================================
-        echo 依存関係インストール中...
-        call .venv\Scripts\activate.bat
-        if errorlevel 1 (
-          echo ❌ 仮想環境のアクティベートに失敗しました
-          exit /b 1
-        )
-        echo 仮想環境アクティベート後のPythonパス:
-        python -c "import sys; print(sys.executable)"
-        echo uv syncで依存関係を解決中...
+        echo uv syncを実行中...
         uv sync
         if errorlevel 1 (
-          echo ❌ 依存関係のインストールに失敗しました
+          echo ❌ uv syncに失敗しました
           exit /b 1
         )
-        echo ✅ 依存関係インストール完了
+        echo ✅ uv sync完了
         
         REM drowsy_detectionアルゴリズムのインストール
         echo ========================================
@@ -164,15 +142,14 @@ jobs:
         echo evaluation_engine main.py実行
         echo ========================================
         cd evaluation_engine
-        echo evaluation_engineのmain.pyを実行中...
+        echo evaluation_engineディレクトリに移動完了
         echo 現在のディレクトリ:
         cd
         echo evaluation_engineディレクトリ内容:
         dir
         echo main.pyファイルの確認:
         dir main.py
-        echo 仮想環境の確認:
-        dir .venv
+        
         echo uv run main.pyを実行中...
         uv run main.py
         if errorlevel 1 (
