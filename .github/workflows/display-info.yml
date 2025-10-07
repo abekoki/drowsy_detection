@@ -81,24 +81,22 @@ jobs:
     - name: Save information to file
       run: |
         # 情報をファイルに保存
-        cat > commit_info.txt << EOF
-プロジェクト情報
-================
-バージョン: ${{ steps.commit-info.outputs.version }}
-ブランチ: ${{ steps.commit-info.outputs.branch_name }}
-実行日時: $(date '+%Y-%m-%d %H:%M:%S JST')
-
-コミット情報
-============
-コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }}
-短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }}
-コミットメッセージ: ${{ steps.commit-info.outputs.commit_message }}
-コミット日時: ${{ steps.commit-info.outputs.commit_date }}
-
-変更ログ（直近5コミット）
-========================
-${{ steps.commit-info.outputs.changelog }}
-EOF
+        echo "プロジェクト情報" > commit_info.txt
+        echo "================" >> commit_info.txt
+        echo "バージョン: ${{ steps.commit-info.outputs.version }}" >> commit_info.txt
+        echo "ブランチ: ${{ steps.commit-info.outputs.branch_name }}" >> commit_info.txt
+        echo "実行日時: $(date '+%Y-%m-%d %H:%M:%S JST')" >> commit_info.txt
+        echo "" >> commit_info.txt
+        echo "コミット情報" >> commit_info.txt
+        echo "============" >> commit_info.txt
+        echo "コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }}" >> commit_info.txt
+        echo "短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }}" >> commit_info.txt
+        echo "コミットメッセージ: ${{ steps.commit-info.outputs.commit_message }}" >> commit_info.txt
+        echo "コミット日時: ${{ steps.commit-info.outputs.commit_date }}" >> commit_info.txt
+        echo "" >> commit_info.txt
+        echo "変更ログ（直近5コミット）" >> commit_info.txt
+        echo "========================" >> commit_info.txt
+        echo "${{ steps.commit-info.outputs.changelog }}" >> commit_info.txt
         
         echo "📄 情報を commit_info.txt に保存しました"
         cat commit_info.txt
