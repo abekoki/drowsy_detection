@@ -16,16 +16,11 @@ jobs:
     
     - name: Verify Python installation
       run: |
+        echo "Python環境の確認中..."
         python --version
         python -c "import sys; print(f'Python {sys.version}')"
-    
-    - name: Set up Python (fallback)
-      if: failure()
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        check-latest: false
-        update-environment: false
+        python -c "import tomllib; print('tomllib利用可能')"
+        echo "✅ Python環境OK"
     
     - name: Get commit information
       id: commit-info

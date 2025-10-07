@@ -13,7 +13,45 @@
 3. ランナーのOSを選択（Windows/Linux/macOS）
 4. 表示されるコマンドを実行環境で実行
 
-### 2. Windows環境での設定例
+### 2. Python環境の事前インストール
+
+セルフホストランナー環境にPython 3.10以上を事前にインストールしてください：
+
+#### Windows環境でのインストール
+
+```powershell
+# Python 3.10のダウンロード（公式サイトから）
+# https://www.python.org/downloads/release/python-31011/
+
+# または、Chocolateyを使用（推奨）
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# Python 3.10をインストール
+choco install python --version=3.10.11 -y
+
+# インストール確認
+python --version
+python -c "import tomllib; print('tomllib利用可能')"
+```
+
+#### Linux環境でのインストール
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install python3.10 python3.10-venv python3.10-dev
+
+# CentOS/RHEL
+sudo yum install python3.10 python3.10-pip
+
+# インストール確認
+python3.10 --version
+python3.10 -c "import tomllib; print('tomllib利用可能')"
+```
+
+### 3. Windows環境での設定
 
 ```powershell
 # ランナー用ディレクトリを作成
