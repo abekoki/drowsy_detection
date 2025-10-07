@@ -111,10 +111,17 @@ jobs:
         echo uv syncを実行中...
         uv sync
         if errorlevel 1 (
-          echo ❌ uv syncに失敗しました
-          exit /b 1
+          echo ❌ uv syncに失敗しました - python -m uv syncを試行
+          echo python -m uv syncを実行中...
+          python -m uv sync
+          if errorlevel 1 (
+            echo ❌ python -m uv syncにも失敗しました
+            exit /b 1
+          )
+          echo ✅ python -m uv sync完了
+        ) else (
+          echo ✅ uv sync完了
         )
-        echo ✅ uv sync完了
         
         REM drowsy_detectionアルゴリズムのインストール
         echo ========================================
