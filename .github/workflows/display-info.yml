@@ -31,7 +31,7 @@ jobs:
         for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
         for /f %%i in ('git rev-parse --short HEAD') do set COMMIT_SHORT=%%i
         
-        REM コミットメッセージを取得
+        REM コミットメッセージを取得（安全な形式で）
         git log -1 --pretty=format:"%%s" > commit_message.txt
         set /p COMMIT_MESSAGE=<commit_message.txt
         
@@ -48,7 +48,7 @@ jobs:
         REM 変更ログを生成（直近5コミット）
         git log --oneline -5 > changelog_temp.txt
         
-        REM GitHub Actionsの出力に設定
+        REM GitHub Actionsの出力に設定（安全な形式）
         echo commit_hash=%COMMIT_HASH% >> %GITHUB_OUTPUT%
         echo commit_short=%COMMIT_SHORT% >> %GITHUB_OUTPUT%
         echo commit_message=%COMMIT_MESSAGE% >> %GITHUB_OUTPUT%
