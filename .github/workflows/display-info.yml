@@ -1,0 +1,111 @@
+name: Display Commit Info
+
+on:
+  push:
+    branches: [ "*" ]  # 全ブランチで実行
+
+jobs:
+  display-info:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 全履歴を取得
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Get commit information
+      id: commit-info
+      run: |
+        # 直近のコミットハッシュを取得
+        COMMIT_HASH=$(git rev-parse HEAD)
+        COMMIT_SHORT=$(git rev-parse --short HEAD)
+        
+        # コミットメッセージを取得
+        COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
+        
+        # コミット日時を取得
+        COMMIT_DATE=$(git log -1 --pretty=format:"%ci")
+        
+        # ブランチ名を取得
+        BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+        
+        # バージョン情報を取得（pyproject.tomlから）
+        VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        
+        # 変更ログを生成（直近5コミット）
+        CHANGELOG=$(git log --oneline -5)
+        
+        # GitHub Actionsの出力に設定
+        echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+        echo "commit_short=$COMMIT_SHORT" >> $GITHUB_OUTPUT
+        echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+        echo "commit_date=$COMMIT_DATE" >> $GITHUB_OUTPUT
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Display information
+      run: |
+        echo "=========================================="
+        echo "📋 プロジェクト情報"
+        echo "=========================================="
+        echo "🏷️  バージョン: ${{ steps.commit-info.outputs.version }}"
+        echo "🌿 ブランチ: ${{ steps.commit-info.outputs.branch_name }}"
+        echo "📅 実行日時: $(date '+%Y-%m-%d %H:%M:%S JST')"
+        echo ""
+        echo "=========================================="
+        echo "🔗 コミット情報"
+        echo "=========================================="
+        echo "📝 コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }}"
+        echo "🔖 短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }}"
+        echo "💬 コミットメッセージ: ${{ steps.commit-info.outputs.commit_message }}"
+        echo "⏰ コミット日時: ${{ steps.commit-info.outputs.commit_date }}"
+        echo ""
+        echo "=========================================="
+        echo "📜 変更ログ（直近5コミット）"
+        echo "=========================================="
+        echo "${{ steps.commit-info.outputs.changelog }}"
+        echo ""
+        echo "=========================================="
+        echo "✅ 情報表示完了"
+        echo "=========================================="
+    
+    - name: Save information to file
+      run: |
+        # 情報をファイルに保存
+        cat > commit_info.txt << EOF
+プロジェクト情報
+================
+バージョン: ${{ steps.commit-info.outputs.version }}
+ブランチ: ${{ steps.commit-info.outputs.branch_name }}
+実行日時: $(date '+%Y-%m-%d %H:%M:%S JST')
+
+コミット情報
+============
+コミットハッシュ: ${{ steps.commit-info.outputs.commit_hash }}
+短縮ハッシュ: ${{ steps.commit-info.outputs.commit_short }}
+コミットメッセージ: ${{ steps.commit-info.outputs.commit_message }}
+コミット日時: ${{ steps.commit-info.outputs.commit_date }}
+
+変更ログ（直近5コミット）
+========================
+${{ steps.commit-info.outputs.changelog }}
+EOF
+        
+        echo "📄 情報を commit_info.txt に保存しました"
+        cat commit_info.txt
+    
+    - name: Upload commit info as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: commit-info-${{ steps.commit-info.outputs.commit_short }}
+        path: commit_info.txt
+        retention-days: 30
