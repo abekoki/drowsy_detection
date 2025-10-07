@@ -1,0 +1,79 @@
+name: Run Evaluation Engine
+
+on:
+  push:
+    branches: [ "*" ]  # 全ブランチで実行
+
+jobs:
+  run-evaluation-engine:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout drowsy_detection code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 全履歴を取得
+    
+    - name: Verify Python installation
+      shell: cmd
+      run: |
+        echo Python環境の確認中...
+        python --version
+        python -c "import sys; print(f'Python {sys.version}')"
+        echo ✅ Python環境OK
+    
+    - name: Install uv (if not available)
+      shell: cmd
+      run: |
+        echo uvの確認中...
+        uv --version || (
+          echo uvをインストール中...
+          pip install uv
+        )
+        echo ✅ uv準備完了
+    
+    - name: Clone evaluation_engine repository
+      shell: cmd
+      run: |
+        echo evaluation_engineリポジトリをクローン中...
+        if exist evaluation_engine (
+          echo 既存のディレクトリを削除中...
+          rmdir /s /q evaluation_engine
+        )
+        git clone https://github.com/abekoki/evaluation_engine.git
+        cd evaluation_engine
+        echo ✅ evaluation_engineクローン完了
+    
+    - name: Setup evaluation_engine environment
+      shell: cmd
+      run: |
+        cd evaluation_engine
+        echo evaluation_engineの環境セットアップ中...
+        
+        # 仮想環境の作成と依存関係のインストール
+        uv venv
+        call .venv\Scripts\activate.bat
+        uv sync
+        
+        # drowsy_detectionアルゴリズムのインストール（現在のリポジトリから）
+        uv pip install -e ../
+        
+        echo ✅ evaluation_engine環境セットアップ完了
+    
+    - name: Run evaluation_engine main.py
+      shell: cmd
+      run: |
+        cd evaluation_engine
+        call .venv\Scripts\activate.bat
+        
+        echo evaluation_engineのmain.pyを実行中...
+        python main.py
+        
+        echo ✅ evaluation_engine実行完了
+    
+    - name: Upload evaluation results as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: evaluation-results-${{ github.sha }}
+        path: evaluation_engine/
+        retention-days: 30
