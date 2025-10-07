@@ -17,71 +17,118 @@ jobs:
     - name: Verify Python installation
       shell: cmd
       run: |
+        echo ========================================
+        echo Python環境の詳細確認
+        echo ========================================
         echo Python環境の確認中...
         python --version
         python -c "import sys; print(f'Python {sys.version}')"
+        python -c "import sys; print(f'Python実行パス: {sys.executable}')"
+        python -c "import sys; print(f'Pythonパス: {sys.path}')"
+        echo 現在のディレクトリ:
+        cd
+        echo 環境変数PATH:
+        echo %PATH%
         echo ✅ Python環境OK
     
     - name: Install uv (if not available)
       shell: cmd
       run: |
+        echo ========================================
+        echo uvの詳細確認とインストール
+        echo ========================================
         echo uvの確認中...
         where uv >nul 2>&1 || (
           echo uvをシステム全体にインストール中...
           python -m pip install --user uv
           echo uvのパスを確認中...
           python -c "import shutil; print(shutil.which('uv') or 'uv not found in PATH')"
+          echo uvの実際のインストール場所を確認:
+          python -c "import uv; print(uv.__file__)" 2>nul || echo uvモジュールの場所を確認できません
+          echo pip listでuvの確認:
+          python -m pip list | findstr uv
         )
         echo uvのパス確認:
         where uv 2>nul || echo uvがパスに見つかりません
+        echo python -m uvの確認:
+        python -c "import uv; print('uvモジュール利用可能:', uv.__version__)" 2>nul || echo uvモジュールが利用できません
         echo ✅ uv準備完了
     
     - name: Clone evaluation_engine repository
       shell: cmd
       run: |
+        echo ========================================
+        echo evaluation_engineリポジトリのクローン
+        echo ========================================
         echo evaluation_engineリポジトリをクローン中...
+        echo 現在のディレクトリ:
+        cd
+        echo ディレクトリ内容:
+        dir
         if exist evaluation_engine (
           echo 既存のディレクトリを削除中...
           rmdir /s /q evaluation_engine
         )
+        echo Gitクローン実行:
         git clone https://github.com/abekoki/evaluation_engine.git
+        echo クローン後のディレクトリ内容:
+        dir
         cd evaluation_engine
+        echo evaluation_engineディレクトリ内容:
+        dir
         echo ✅ evaluation_engineクローン完了
     
     - name: Setup evaluation_engine environment
       shell: cmd
       run: |
+        echo ========================================
+        echo evaluation_engine環境セットアップ
+        echo ========================================
         cd evaluation_engine
         echo evaluation_engineの環境セットアップ中...
+        echo 現在のディレクトリ:
+        cd
+        echo evaluation_engineディレクトリ内容:
+        dir
         
         REM 仮想環境の作成
+        echo ========================================
+        echo 仮想環境の作成
+        echo ========================================
         echo 仮想環境作成中...
         where uv >nul 2>&1 && (
           echo uvコマンドを使用して仮想環境作成
           uv venv
         ) || (
-          echo uvが見つからないため、python -m venvを使用
-          python -m venv .venv
+          echo python -m uvを使用して仮想環境作成
+          python -m uv venv
         )
         if errorlevel 1 (
           echo ❌ 仮想環境作成に失敗しました
           exit /b 1
         )
         echo ✅ 仮想環境作成完了
+        echo .venvディレクトリ内容:
+        dir .venv
         
         REM 依存関係のインストール
+        echo ========================================
+        echo 依存関係のインストール
+        echo ========================================
         echo 依存関係インストール中...
         call .venv\Scripts\activate.bat
         if errorlevel 1 (
           echo ❌ 仮想環境のアクティベートに失敗しました
           exit /b 1
         )
+        echo 仮想環境アクティベート後のPythonパス:
+        python -c "import sys; print(sys.executable)"
         where uv >nul 2>&1 && (
           echo uvコマンドを使用して依存関係インストール
           uv sync
         ) || (
-          echo uvが見つからないため、pipを使用
-          pip install -r requirements.txt 2>nul || echo requirements.txtが見つかりません
+          echo python -m uvを使用して依存関係インストール
+          python -m uv sync
         )
         if errorlevel 1 (
           echo ❌ 依存関係のインストールに失敗しました
@@ -90,35 +137,59 @@ jobs:
         echo ✅ 依存関係インストール完了
         
         REM drowsy_detectionアルゴリズムのインストール
+        echo ========================================
+        echo drowsy_detectionアルゴリズムのインストール
+        echo ========================================
         echo drowsy_detectionインストール中...
+        echo 親ディレクトリの内容:
+        dir ..
         where uv >nul 2>&1 && (
           echo uvコマンドを使用してdrowsy_detectionインストール
           uv pip install -e ../
         ) || (
-          echo pipを使用してdrowsy_detectionインストール
-          pip install -e ../
+          echo python -m uvを使用してdrowsy_detectionインストール
+          python -m uv pip install -e ../
         )
         if errorlevel 1 (
           echo ❌ drowsy_detectionのインストールに失敗しました
           exit /b 1
         )
         echo ✅ drowsy_detectionインストール完了
+        echo インストール後のパッケージ一覧:
+        python -m pip list | findstr drowsy
         
         echo ✅ evaluation_engine環境セットアップ完了
     
     - name: Run evaluation_engine main.py
       shell: cmd
       run: |
+        echo ========================================
+        echo evaluation_engine main.py実行
+        echo ========================================
         cd evaluation_engine
         echo evaluation_engineのmain.pyを実行中...
-        call .venv\Scripts\activate.bat
-        if errorlevel 1 (
-          echo ❌ 仮想環境のアクティベートに失敗しました
-          exit /b 1
+        echo 現在のディレクトリ:
+        cd
+        echo evaluation_engineディレクトリ内容:
+        dir
+        echo main.pyファイルの確認:
+        dir main.py
+        echo 仮想環境の確認:
+        dir .venv
+        where uv >nul 2>&1 && (
+          echo uv run main.pyを実行
+          uv run main.py
+        ) || (
+          echo python -m uv run main.pyを実行
+          python -m uv run main.py
         )
-        python main.py
         if errorlevel 1 (
           echo ❌ main.pyの実行に失敗しました
+          echo エラー詳細を確認:
+          echo 仮想環境内のPythonパス:
+          call .venv\Scripts\activate.bat && python -c "import sys; print(sys.executable)"
+          echo 仮想環境内のパッケージ一覧:
+          call .venv\Scripts\activate.bat && python -m pip list
           exit /b 1
         )
         echo ✅ evaluation_engine実行完了
