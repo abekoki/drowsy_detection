@@ -27,35 +27,36 @@ jobs:
       id: commit-info
       shell: cmd
       run: |
-        # 直近のコミットハッシュを取得
+        REM 直近のコミットハッシュを取得
         for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
         for /f %%i in ('git rev-parse --short HEAD') do set COMMIT_SHORT=%%i
         
-        # コミットメッセージを取得
-        for /f "delims=" %%i in ('git log -1 --pretty=format:"%%s"') do set COMMIT_MESSAGE=%%i
+        REM コミットメッセージを取得
+        git log -1 --pretty=format:"%%s" > commit_message.txt
+        set /p COMMIT_MESSAGE=<commit_message.txt
         
-        # コミット日時を取得
-        for /f "delims=" %%i in ('git log -1 --pretty=format:"%%ci"') do set COMMIT_DATE=%%i
+        REM コミット日時を取得
+        git log -1 --pretty=format:"%%ci" > commit_date.txt
+        set /p COMMIT_DATE=<commit_date.txt
         
-        # ブランチ名を取得
+        REM ブランチ名を取得
         for /f %%i in ('git rev-parse --abbrev-ref HEAD') do set BRANCH_NAME=%%i
         
-        # バージョン情報を取得（pyproject.tomlから）
+        REM バージョン情報を取得（pyproject.tomlから）
         for /f %%i in ('python -c "import tomllib; print(tomllib.load(open(\"pyproject.toml\", \"rb\"))[\"project\"][\"version\"])"') do set VERSION=%%i
         
-        # 変更ログを生成（直近5コミット）
+        REM 変更ログを生成（直近5コミット）
         git log --oneline -5 > changelog_temp.txt
         
-        # GitHub Actionsの出力に設定
+        REM GitHub Actionsの出力に設定
         echo commit_hash=%COMMIT_HASH% >> %GITHUB_OUTPUT%
         echo commit_short=%COMMIT_SHORT% >> %GITHUB_OUTPUT%
         echo commit_message=%COMMIT_MESSAGE% >> %GITHUB_OUTPUT%
         echo commit_date=%COMMIT_DATE% >> %GITHUB_OUTPUT%
         echo branch_name=%BRANCH_NAME% >> %GITHUB_OUTPUT%
         echo version=%VERSION% >> %GITHUB_OUTPUT%
-        echo changelog<<EOF >> %GITHUB_OUTPUT%
+        echo changelog= >> %GITHUB_OUTPUT%
         type changelog_temp.txt >> %GITHUB_OUTPUT%
-        echo EOF >> %GITHUB_OUTPUT%
     
     - name: Display information
       shell: cmd
@@ -87,7 +88,7 @@ jobs:
     - name: Save information to file
       shell: cmd
       run: |
-        # 情報をファイルに保存
+        REM 情報をファイルに保存
         echo プロジェクト情報 > commit_info.txt
         echo ================ >> commit_info.txt
         echo バージョン: ${{ steps.commit-info.outputs.version }} >> commit_info.txt
