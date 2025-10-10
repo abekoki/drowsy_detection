@@ -21,7 +21,7 @@ jobs:
         python --version
         python -c "import sys; print(f'Python {sys.version}')"
         python -c "import tomllib; print('tomllib利用可能')"
-        echo ✅ Python環境OK
+        echo ✅ Python環境OK！
     
     - name: Get commit information
       id: commit-info
