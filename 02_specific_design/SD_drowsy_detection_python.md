@@ -87,13 +87,13 @@ class Config(BaseModel):
     
     # 閾値パラメータ
     left_eye_close_threshold: float = Field(
-        default=0.10,
+        default=0.105,
         ge=0.0,
         le=1.0,
         description="左目の開眼度がこの値以下で閉眼と判定"
     )
     right_eye_close_threshold: float = Field(
-        default=0.10,
+        default=0.105,
         ge=0.0,
         le=1.0,
         description="右目の開眼度がこの値以下で閉眼と判定"
@@ -694,8 +694,8 @@ class TestDrowsyDetector:
     def config(self):
         """テスト用設定"""
         return Config(
-            left_eye_close_threshold=0.10,
-            right_eye_close_threshold=0.10,
+            left_eye_close_threshold=0.105,
+            right_eye_close_threshold=0.105,
             continuous_close_time=1.0,
             face_conf_threshold=0.75
         )
@@ -885,8 +885,8 @@ from core.drowsy_detector import DrowsyDetector
 def main():
     # 設定
             config = Config(
-            left_eye_close_threshold=0.10,
-            right_eye_close_threshold=0.10,
+            left_eye_close_threshold=0.105,
+            right_eye_close_threshold=0.105,
             continuous_close_time=1.0,
             face_conf_threshold=0.75
         )
@@ -971,6 +971,7 @@ if __name__ == "__main__":
 | --- | --- | --- | --- |
 | 2025-08-07 | 1.0.0 | 初版作成 | GPT-Assist |
 | 2025-08-26 | 0.1.1 | 検知感度パラメータ調整：左右目閉眼閾値を0.30→0.10、顔検出閾値を0.70→0.75に変更 | GPT-Assist |
+| 2025-10-10 | 0.1.2 | 検知感度パラメータ調整：左右目閉眼閾値を0.10→0.105に変更 | GPT-Assist |
 
 ---
 

@@ -14,13 +14,13 @@ class Config(BaseModel):
     
     # 閾値パラメータ
     left_eye_close_threshold: float = Field(
-        default=0.10,
+        default=0.105,
         ge=0.0,
         le=1.0,
         description="左目の開眼度がこの値以下で閉眼と判定"
     )
     right_eye_close_threshold: float = Field(
-        default=0.10,
+        default=0.105,
         ge=0.0,
         le=1.0,
         description="右目の開眼度がこの値以下で閉眼と判定"
