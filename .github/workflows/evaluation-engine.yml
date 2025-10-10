@@ -2,7 +2,7 @@ name: Run Evaluation Engine
 
 on:
   push:
-    branches: [ "*" ]  # 全ブランチで実行
+    branches: ["*"]  # 全ブランチで実行
 
 jobs:
   run-evaluation-engine:
@@ -31,41 +31,22 @@ jobs:
         echo %PATH%
         echo ✅ Python環境OK
     
-    - name: Install uv (if not available)
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true  # セルフホストではキャッシュが残るため有効化
+        version: latest     # 最新版のuvを指定（必要に応じて特定バージョンを指定可能）
+
+    - name: Verify uv installation
       shell: cmd
       run: |
         echo ========================================
-        echo uvの詳細確認とインストール
+        echo uvの詳細確認
         echo ========================================
         echo uvの確認中...
-        where uv >nul 2>&1 || (
-          echo uvをシステム全体にインストール中...
-          python -m pip install --user uv
-          echo uvのパスを確認中...
-          python -c "import shutil; print(shutil.which('uv') or 'uv not found in PATH')"
-          echo uvの実際のインストール場所を確認:
-          python -c "import uv; print(uv.__file__)" 2>nul || echo uvモジュールの場所を確認できません
-          echo pip listでuvの確認:
-          python -m pip list | findstr uv
-        )
-        echo uvのパス確認:
-        where uv 2>nul || echo uvがパスに見つかりません
-        echo python -m uvの確認:
-        python -c "import uv; print('uvモジュール利用可能:', uv.__version__)" 2>nul || (
-          echo uvモジュールのインポートに失敗しました - これは正常な場合があります
-          echo 代替方法でuvの確認:
-          python -c "import subprocess; result = subprocess.run(['python', '-m', 'uv', '--version'], capture_output=True, text=True); print('python -m uv version:', result.stdout.strip() if result.returncode == 0 else 'Failed')" 2>nul || echo python -m uvの実行に失敗
-        )
+        where uv
+        uv --version
         echo ✅ uv準備完了
-        
-        REM uvの実際の動作確認
-        echo ========================================
-        echo uvの実際の動作確認
-        echo ========================================
-        echo python -m uv --versionの実行:
-        python -m uv --version 2>nul || echo python -m uv --versionに失敗
-        echo python -m uv venv --helpの実行:
-        python -m uv venv --help 2>nul | findstr "Create a virtual environment" || echo python -m uv venv --helpに失敗
     
     - name: Clone evaluation_engine repository
       shell: cmd
@@ -104,25 +85,16 @@ jobs:
         echo evaluation_engineディレクトリ内容:
         dir
         
-        REM uv syncで依存関係を解決
         echo ========================================
         echo uv syncで依存関係を解決
         echo ========================================
         echo uv syncを実行中...
         uv sync
         if errorlevel 1 (
-          echo ❌ uv syncに失敗しました - python -m uv syncを試行
-          echo python -m uv syncを実行中...
-          python -m uv sync
-          if errorlevel 1 (
-            echo ❌ python -m uv syncにも失敗しました
-            exit /b 1
-          )
-          echo ✅ python -m uv sync完了
-        ) else (
-          echo ✅ uv sync完了
+          echo ❌ uv syncに失敗しました
+          exit /b 1
         )
-
+        echo ✅ uv sync完了
         echo ✅ evaluation_engine環境セットアップ完了
     
     - name: Run evaluation_engine main.py
@@ -143,22 +115,15 @@ jobs:
         echo uv run main.pyを実行中...
         uv run main.py
         if errorlevel 1 (
-          echo ❌ uv run main.pyに失敗しました - python -m uv run main.pyを試行
-          echo python -m uv run main.pyを実行中...
-          python -m uv run main.py
-          if errorlevel 1 (
-            echo ❌ python -m uv run main.pyにも失敗しました
-            echo エラー詳細を確認:
-            echo 仮想環境内のPythonパス:
-            call .venv\Scripts\activate.bat && python -c "import sys; print(sys.executable)"
-            echo 仮想環境内のパッケージ一覧:
-            call .venv\Scripts\activate.bat && python -m pip list
-            exit /b 1
-          )
-          echo ✅ python -m uv run main.py完了
-        ) else (
-          echo ✅ evaluation_engine実行完了
+          echo ❌ uv run main.pyに失敗しました
+          echo エラー詳細を確認:
+          echo 仮想環境内のPythonパス:
+          call .venv\Scripts\activate.bat && python -c "import sys; print(sys.executable)"
+          echo 仮想環境内のパッケージ一覧:
+          call .venv\Scripts\activate.bat && python -m pip list
+          exit /b 1
         )
+        echo ✅ evaluation_engine実行完了
     
     - name: Upload evaluation results as artifact
       uses: actions/upload-artifact@v4
