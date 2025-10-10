@@ -2,7 +2,7 @@ name: Display Commit Info
 
 on:
   push:
-    branches: [ "*" ]  # 全ブランチで実行
+    branches: [ "main" ]  # 全ブランチで実行
 
 jobs:
   display-info:
